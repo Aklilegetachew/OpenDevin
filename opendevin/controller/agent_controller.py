@@ -9,8 +9,6 @@ from opendevin.agent import Agent
 from opendevin.action import (
     Action,
     NullAction,
-    FileReadAction,
-    FileWriteAction,
     AgentFinishAction,
     AddSubtaskAction,
     ModifySubtaskAction
@@ -103,12 +101,7 @@ class AgentController:
         if isinstance(action, AgentFinishAction):
             print_with_indent("\nFINISHED")
             return True
-        if isinstance(action, (FileReadAction, FileWriteAction)):
-            action_cls = action.__class__
-            _kwargs = action.__dict__
-            _kwargs["base_path"] = self.workdir
-            action = action_cls(**_kwargs)
-            print(action, flush=True)
+
         if isinstance(action, AddSubtaskAction):
             try:
                 self.state.plan.add_subtask(action.parent, action.goal)
@@ -123,7 +116,6 @@ class AgentController:
                 observation = AgentErrorObservation(str(e))
                 print_with_indent("\nMODIFY TASK ERROR:\n%s" % observation)
                 traceback.print_exc()
-
 
         if action.executable:
             try:
